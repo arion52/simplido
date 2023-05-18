@@ -1,4 +1,4 @@
-# bullet_notes_application
+# SimpliDo
 
 A new Flutter project.
 
