@@ -66,7 +66,7 @@ class _TodoScreenState extends State<TodoScreen> {
     setState(() {
       String todoTitle = _todoController.text.trim();
       if (todoTitle.isEmpty) {
-        showErrorDialog(context, 'Input cannot be empty.');
+        showErrorDialog(context, 'Task cannot be empty. Please enter a task description.');
         return;
       }
       ;
