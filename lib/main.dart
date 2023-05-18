@@ -42,9 +42,35 @@ class _TodoScreenState extends State<TodoScreen> {
   TextEditingController _todoController = TextEditingController();
   Priority _selectedPriority = Priority.medium;
 
+  void showErrorDialog(BuildContext context, String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(errorMessage),
+          actions: [
+            ElevatedButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void addTodo() {
     setState(() {
       String todoTitle = _todoController.text.trim();
+      if (todoTitle.isEmpty) {
+        showErrorDialog(context, 'Input cannot be empty.');
+        return;
+      }
+      ;
+
       if (todoTitle.isNotEmpty) {
         Todo newTodo = Todo(
           title: todoTitle,
