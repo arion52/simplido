@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(TodoApp());
+  runApp(const TodoApp());
 }
 
 class Todo {
@@ -17,6 +17,8 @@ class Todo {
 }
 
 class TodoApp extends StatelessWidget {
+  const TodoApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,12 +26,14 @@ class TodoApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: TodoScreen(),
+      home: const TodoScreen(),
     );
   }
 }
 
 class TodoScreen extends StatefulWidget {
+  const TodoScreen({super.key});
+
   @override
   _TodoScreenState createState() => _TodoScreenState();
 }
@@ -37,7 +41,7 @@ class TodoScreen extends StatefulWidget {
 class _TodoScreenState extends State<TodoScreen> {
   List<Todo> todos = [];
 
-  TextEditingController _todoController = TextEditingController();
+  final TextEditingController _todoController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
 
   @override
@@ -51,11 +55,11 @@ class _TodoScreenState extends State<TodoScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Error'),
+          title: const Text('Error'),
           content: Text(errorMessage),
           actions: [
             ElevatedButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -118,8 +122,8 @@ class _TodoScreenState extends State<TodoScreen> {
           toggleTodoStatus(index);
         },
         child: todo.isCompleted
-            ? Icon(Icons.check_box, color: Colors.red)
-            : Icon(Icons.check_box_outline_blank),
+            ? const Icon(Icons.check_box, color: Colors.red)
+            : const Icon(Icons.check_box_outline_blank),
       ),
       title: Text(
         todo.title,
@@ -133,7 +137,7 @@ class _TodoScreenState extends State<TodoScreen> {
         'Due Date: ${todo.dueDate.toString().split(' ')[0]}',
       ),
       trailing: IconButton(
-        icon: Icon(Icons.delete),
+        icon: const Icon(Icons.delete),
         onPressed: () {
           deleteTodo(index);
         },
@@ -148,17 +152,18 @@ class _TodoScreenState extends State<TodoScreen> {
       firstDate: DateTime(2021),
       lastDate: DateTime(2030),
     );
-    if (picked != null && picked != _selectedDate)
+    if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
       });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('SimpliDo'),
+        title: const Text('SimpliDo'),
       ),
       body: Column(
         children: [
@@ -170,13 +175,13 @@ class _TodoScreenState extends State<TodoScreen> {
                     todos[index].isCompleted != todos[index - 1].isCompleted) {
                   return Column(
                     children: [
-                      Divider(),
+                      const Divider(),
                       ListTile(
                         title: Text(
                           todos[index].isCompleted
                               ? 'Completed Tasks'
                               : 'Incomplete Tasks',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16.0,
                           ),
@@ -192,34 +197,34 @@ class _TodoScreenState extends State<TodoScreen> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _todoController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Add a to-do',
                     ),
                   ),
                 ),
-                SizedBox(width: 8.0),
+                const SizedBox(width: 8.0),
                 GestureDetector(
                   onTap: () {
                     selectDate(context);
                   },
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_today),
-                      SizedBox(width: 4.0),
+                      const Icon(Icons.calendar_today),
+                      const SizedBox(width: 4.0),
                       Text(_selectedDate.toString().split(' ')[0]),
                     ],
                   ),
                 ),
-                SizedBox(width: 8.0),
+                const SizedBox(width: 8.0),
                 ElevatedButton(
                   onPressed: addTodo,
-                  child: Text('Add'),
+                  child: const Text('Add'),
                 ),
               ],
             ),
