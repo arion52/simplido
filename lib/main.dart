@@ -4,16 +4,14 @@ void main() {
   runApp(TodoApp());
 }
 
-enum Priority { high, medium, low }
-
 class Todo {
   String title;
-  Priority priority;
+  DateTime dueDate;
   bool isCompleted;
 
   Todo({
     required this.title,
-    required this.priority,
+    required this.dueDate,
     this.isCompleted = false,
   });
 }
@@ -40,7 +38,13 @@ class _TodoScreenState extends State<TodoScreen> {
   List<Todo> todos = [];
 
   TextEditingController _todoController = TextEditingController();
-  Priority _selectedPriority = Priority.medium;
+  DateTime _selectedDate = DateTime.now();
+
+  @override
+  void dispose() {
+    _todoController.dispose();
+    super.dispose();
+  }
 
   void showErrorDialog(BuildContext context, String errorMessage) {
     showDialog(
@@ -63,29 +67,27 @@ class _TodoScreenState extends State<TodoScreen> {
   }
 
   void addTodo() {
-    setState(() {
-      String todoTitle = _todoController.text.trim();
-      if (todoTitle.isEmpty) {
-        showErrorDialog(context, 'Task cannot be empty. Please enter a task description.');
-        return;
-      }
-      ;
+    String todoTitle = _todoController.text.trim();
+    if (todoTitle.isEmpty) {
+      showErrorDialog(
+          context, 'Task cannot be empty. Please enter a task description.');
+      return;
+    }
 
-      if (todoTitle.isNotEmpty) {
-        Todo newTodo = Todo(
-          title: todoTitle,
-          priority: _selectedPriority,
-        );
-        todos.add(newTodo);
-        todos.sort((a, b) {
-          if (a.isCompleted != b.isCompleted) {
-            return a.isCompleted ? 1 : -1;
-          } else {
-            return a.priority.index.compareTo(b.priority.index);
-          }
-        });
-        _todoController.clear();
-      }
+    Todo newTodo = Todo(
+      title: todoTitle,
+      dueDate: _selectedDate,
+    );
+    setState(() {
+      todos.add(newTodo);
+      todos.sort((a, b) {
+        if (a.isCompleted != b.isCompleted) {
+          return a.isCompleted ? 1 : -1;
+        } else {
+          return a.dueDate.compareTo(b.dueDate);
+        }
+      });
+      _todoController.clear();
     });
   }
 
@@ -96,7 +98,7 @@ class _TodoScreenState extends State<TodoScreen> {
         if (a.isCompleted != b.isCompleted) {
           return a.isCompleted ? 1 : -1;
         } else {
-          return a.priority.index.compareTo(b.priority.index);
+          return a.dueDate.compareTo(b.dueDate);
         }
       });
     });
@@ -106,6 +108,50 @@ class _TodoScreenState extends State<TodoScreen> {
     setState(() {
       todos.removeAt(index);
     });
+  }
+
+  Widget buildTodoTile(int index) {
+    Todo todo = todos[index];
+    return ListTile(
+      leading: GestureDetector(
+        onTap: () {
+          toggleTodoStatus(index);
+        },
+        child: todo.isCompleted
+            ? Icon(Icons.check_box, color: Colors.red)
+            : Icon(Icons.check_box_outline_blank),
+      ),
+      title: Text(
+        todo.title,
+        style: TextStyle(
+          decoration: todo.isCompleted
+              ? TextDecoration.lineThrough
+              : TextDecoration.none,
+        ),
+      ),
+      subtitle: Text(
+        'Due Date: ${todo.dueDate.toString().split(' ')[0]}',
+      ),
+      trailing: IconButton(
+        icon: Icon(Icons.delete),
+        onPressed: () {
+          deleteTodo(index);
+        },
+      ),
+    );
+  }
+
+  Future<void> selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2021),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null && picked != _selectedDate)
+      setState(() {
+        _selectedDate = picked;
+      });
   }
 
   @override
@@ -136,63 +182,11 @@ class _TodoScreenState extends State<TodoScreen> {
                           ),
                         ),
                       ),
-                      ListTile(
-                        leading: GestureDetector(
-                          onTap: () {
-                            toggleTodoStatus(index);
-                          },
-                          child: todos[index].isCompleted
-                              ? Icon(Icons.check_box, color: Colors.red)
-                              : Icon(Icons.check_box_outline_blank),
-                        ),
-                        title: Text(
-                          todos[index].title,
-                          style: TextStyle(
-                            decoration: todos[index].isCompleted
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                          ),
-                        ),
-                        subtitle: Text(
-                          'Priority: ${todos[index].priority.toString().split('.').last}',
-                        ),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            deleteTodo(index);
-                          },
-                        ),
-                      ),
+                      buildTodoTile(index),
                     ],
                   );
                 } else {
-                  return ListTile(
-                    leading: GestureDetector(
-                      onTap: () {
-                        toggleTodoStatus(index);
-                      },
-                      child: todos[index].isCompleted
-                          ? Icon(Icons.check_box, color: Colors.red)
-                          : Icon(Icons.check_box_outline_blank),
-                    ),
-                    title: Text(
-                      todos[index].title,
-                      style: TextStyle(
-                        decoration: todos[index].isCompleted
-                            ? TextDecoration.lineThrough
-                            : TextDecoration.none,
-                      ),
-                    ),
-                    subtitle: Text(
-                      'Priority: ${todos[index].priority.toString().split('.').last}',
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        deleteTodo(index);
-                      },
-                    ),
-                  );
+                  return buildTodoTile(index);
                 }
               },
             ),
@@ -210,19 +204,17 @@ class _TodoScreenState extends State<TodoScreen> {
                   ),
                 ),
                 SizedBox(width: 8.0),
-                DropdownButton<Priority>(
-                  value: _selectedPriority,
-                  onChanged: (Priority? value) {
-                    setState(() {
-                      _selectedPriority = value!;
-                    });
+                GestureDetector(
+                  onTap: () {
+                    selectDate(context);
                   },
-                  items: Priority.values.map((Priority priority) {
-                    return DropdownMenuItem<Priority>(
-                      value: priority,
-                      child: Text(priority.toString().split('.').last),
-                    );
-                  }).toList(),
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_today),
+                      SizedBox(width: 4.0),
+                      Text(_selectedDate.toString().split(' ')[0]),
+                    ],
+                  ),
                 ),
                 SizedBox(width: 8.0),
                 ElevatedButton(
