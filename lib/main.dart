@@ -27,7 +27,8 @@ class TodoApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const TodoScreen(),
-    );
+      debugShowCheckedModeBanner: false,
+    ); 
   }
 }
 
